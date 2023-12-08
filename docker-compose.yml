@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  php-web:
+    image: niclab/php7.0
+    working_dir: /var/www
+    ports:
+      - 60021:80
+    volumes:
+      - ./root:/var/www
+      - ./docker/php-web/php.ini:/usr/local/etc/php/php.ini
+      - ./docker/php-web/custom-vhost.conf:/etc/apache2/sites-available/000-default.conf
+
+  mysql:
+    image: library/mysql:5.7
+    container_name: mysql60121
+    ports:
+      - 60121:3306
+    volumes:
+      # 初期データを投入するSQLが格納されているdir
+      - ./docker/mysql/initdb.d:/docker-entrypoint-initdb.d
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=dbname
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mysql60121
+      - PMA_USER=user
+      - PMA_PASSWORD=password
+    ports:
+      - 60221:80
+    volumes:
+      - ./phpmyadmin/sessions:/sessions
+      - ./docker/phpmyadmin/php.ini:/usr/local/etc/php/conf.d/custom.ini
